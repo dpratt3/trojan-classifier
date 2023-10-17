@@ -1,0 +1,46 @@
+# Ignore CSV files
+*.csv
+
+# Ignore lock files (e.g., package-lock.json, yarn.lock)
+package-lock.json
+yarn.lock
+
+# Ignore binary files
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.ico
+*.woff
+*.woff2
+*.eot
+*.ttf
+*.otf
+
+# Ignore log files
+*.log
+
+# Ignore database files
+*.sqlite
+*.db
+*.db3
+
+# Ignore system or temporary files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Ignore editor-specific files
+.vscode/
+.idea/
+*.swp
+
+# Ignore environment-specific files
+.env
+.env.local
+
+# Ignore build output
+/dist/
+/build/
+/node_modules/
+
