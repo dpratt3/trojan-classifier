@@ -44,3 +44,6 @@ desktop.ini
 /build/
 /node_modules/
 
+# Ignore files starting with .~lock
+.~lock*
+
