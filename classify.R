@@ -9,6 +9,8 @@ library(lubridate)
 library(mice)
 library(VIM)
 
+set.seed(123) # reproducibility
+
 pw <- {"password"}
 
 drv <- dbDriver("PostgreSQL")
@@ -100,7 +102,7 @@ plot(cumulative_variance, type = "b", xlab = "Number of Principal Components", y
 # look at the cumulative variance contained in the above
 traindata_pca = cbind.data.frame(traindata[, 1:8], numeric_pca$x[ ,1:22], traindata$class)
 colnames(traindata_pca)[ncol(traindata_pca)] <- "class"
-traindata_pca$class <- ifelse(traindata_pca$class == "Trojan", 1, 0)
+traindata_pca$class <- as.factor(ifelse(traindata_pca$class == "Trojan", 1, 0))
 
 #down sample
 set.seed(123)
@@ -120,4 +122,19 @@ naive_bayes_model <- naiveBayes(class ~ ., data = down_sampled_train)
 print(naive_bayes_model)
 
 # how close did we get?
-sum(abs(as.numeric(as.matrix(predict(naive_bayes_model, testing_data))) - testing_data$class)) / dim(testing_data)[[1]]
+sum(abs(as.numeric(as.matrix(predict(naive_bayes_model, testing_data))) - as.numeric(testing_data$class))) / dim(testing_data)[[1]]
+
+# Train a Random Forest Classifier
+# colnames(down_sampled_train) <- gsub(" ", "_", colnames(down_sampled_train))
+# colnames(testing_data) <- gsub(" ", "_", colnames(testing_data))
+# random_forest_model <- randomForest::randomForest(class ~ ., data = down_sampled_train, type = "class", maxdepth = 50)
+
+# # Evaluate Model Performance
+# # Make predictions on the testing data
+# predictions <- predict(random_forest_model, testing_data)
+
+# # Calculate accuracy (adjust as needed for your specific metric)
+# accuracy <- sum(predictions == testing_data$class) / nrow(testing_data)
+
+# # Display the accuracy
+# print(paste("Model Accuracy:", round(accuracy * 100, 2), "%"))
