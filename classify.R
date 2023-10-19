@@ -98,33 +98,26 @@ cumulative_variance <- cumsum(numeric_pca$sdev^2) / sum(numeric_pca$sdev^2)
 plot(cumulative_variance, type = "b", xlab = "Number of Principal Components", ylab = "Cumulative Variance Explained")
 
 # look at the cumulative variance contained in the above
-traindata_pca = cbind.data.frame(traindata[, 1:8], numeric_pca$x[ ,1:10], traindata$class)
+traindata_pca = cbind.data.frame(traindata[, 1:8], numeric_pca$x[ ,1:22], traindata$class)
 colnames(traindata_pca)[ncol(traindata_pca)] <- "class"
 traindata_pca$class <- ifelse(traindata_pca$class == "Trojan", 1, 0)
 
 #down sample
 set.seed(123)
-sample_size <- round(nrow(traindata_pca) * 0.01)
-sampled_data <- traindata_pca[sample(nrow(traindata_pca), sample_size), ]
-
-model = glm(class ~ ., data = sampled_data[, 9:dim(sampled_data)[[2]] ], family = binomial)
-
-# Create an index for the training and testing split
-index <- createDataPartition(sampled_data$class, p = 0.7, list = FALSE)
-
-# Split the data into training and testing sets
-training_data <- sampled_data[index, ]
-testing_data <- sampled_data[-index, ]
+sample_size <- round(nrow(traindata_pca) * 0.20)
+rows = sample(nrow(traindata_pca), sample_size)
+down_sampled_train <- traindata_pca[rows, ]
+testing_data <- traindata_pca[-rows, ]
 
 # Model
 # Load the e1071 package
 library(e1071)
 
 # Create a Naive Bayes classifier
-naive_bayes_model <- naiveBayes(class ~ ., data = training_data)
+naive_bayes_model <- naiveBayes(class ~ ., data = down_sampled_train)
 
 # Print the model summary
 print(naive_bayes_model)
 
 # how close did we get?
-sum(abs(as.numeric(as.matrix(predict(naive_bayes_model, testing_data))) - testing_data$class))
+sum(abs(as.numeric(as.matrix(predict(naive_bayes_model, testing_data))) - testing_data$class)) / dim(testing_data)[[1]]
