@@ -109,9 +109,6 @@ sampled_data <- traindata_pca[sample(nrow(traindata_pca), sample_size), ]
 
 model = glm(class ~ ., data = sampled_data[, 9:dim(sampled_data)[[2]] ], family = binomial)
 
-# testing-training split for complete data
-set.seed(123)
-
 # Create an index for the training and testing split
 index <- createDataPartition(sampled_data$class, p = 0.7, list = FALSE)
 
@@ -128,3 +125,6 @@ naive_bayes_model <- naiveBayes(class ~ ., data = training_data)
 
 # Print the model summary
 print(naive_bayes_model)
+
+# how close did we get?
+sum(abs(as.numeric(as.matrix(predict(naive_bayes_model, testing_data))) - testing_data$class))
