@@ -111,43 +111,5 @@ rows = sample(nrow(traindata_pca), sample_size)
 down_sampled_train <- traindata_pca[rows, ]
 testing_data <- traindata_pca[-rows, ]
 
-# Model
-# Load the e1071 package
-library(e1071)
-
-# Create a Naive Bayes classifier
-naive_bayes_model <- naiveBayes(class ~ ., data = down_sampled_train)
-
-# Print the model summary
-print(naive_bayes_model)
-
-# how close did we get?
-sum(abs(as.numeric(as.matrix(predict(naive_bayes_model, testing_data))) - as.numeric(testing_data$class))) / dim(testing_data)[[1]]
-
-# ROC Curve
-roc_obj <- roc(response = testing_data$class, predictor = nb_predictions[, 2])
-
-# Calculate AUC (Area Under the Curve)
-auc_value <- auc(roc_obj)
-
-# Plot the ROC curve
-plot(roc_obj, main = "ROC Curve for Naive Bayes Classifier", print.auc = TRUE)
-
-# Add a diagonal reference line (random classifier)
-abline(a = 0, b = 1, lty = 2, col = "red")
-
-
-# Train a Random Forest Classifier
-# colnames(down_sampled_train) <- gsub(" ", "_", colnames(down_sampled_train))
-# colnames(testing_data) <- gsub(" ", "_", colnames(testing_data))
-# random_forest_model <- randomForest::randomForest(class ~ ., data = down_sampled_train, type = "class", maxdepth = 50)
-
-# # Evaluate Model Performance
-# # Make predictions on the testing data
-# predictions <- predict(random_forest_model, testing_data)
-
-# # Calculate accuracy (adjust as needed for your specific metric)
-# accuracy <- sum(predictions == testing_data$class) / nrow(testing_data)
-
-# # Display the accuracy
-# print(paste("Model Accuracy:", round(accuracy * 100, 2), "%"))
+dbWriteTable(con, name = "down_sampled_train", value = down_sampled_train, overwrite = TRUE)
+dbWriteTable(con, name = "down_sampled_test", value = testing_data, overwrite = TRUE)
