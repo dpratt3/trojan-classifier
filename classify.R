@@ -124,6 +124,19 @@ print(naive_bayes_model)
 # how close did we get?
 sum(abs(as.numeric(as.matrix(predict(naive_bayes_model, testing_data))) - as.numeric(testing_data$class))) / dim(testing_data)[[1]]
 
+# ROC Curve
+roc_obj <- roc(response = testing_data$class, predictor = nb_predictions[, 2])
+
+# Calculate AUC (Area Under the Curve)
+auc_value <- auc(roc_obj)
+
+# Plot the ROC curve
+plot(roc_obj, main = "ROC Curve for Naive Bayes Classifier", print.auc = TRUE)
+
+# Add a diagonal reference line (random classifier)
+abline(a = 0, b = 1, lty = 2, col = "red")
+
+
 # Train a Random Forest Classifier
 # colnames(down_sampled_train) <- gsub(" ", "_", colnames(down_sampled_train))
 # colnames(testing_data) <- gsub(" ", "_", colnames(testing_data))
