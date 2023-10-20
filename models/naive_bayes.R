@@ -61,3 +61,16 @@ plot(roc_obj, main = "ROC Curve for Naive Bayes Classifier", print.auc = TRUE)
 
 # Add a diagonal reference line (random classifier)
 abline(a = 0, b = 1, lty = 2, col = "red")
+
+classless_test = dbGetQuery(con, "SELECT * FROM classless_test")
+classless_test$`Source Port` = as.factor(classless_test$`Source Port`)
+classless_test$`Destination Port` = as.factor(classless_test$`Destination Port`) 
+classless_test$`Protocol` = as.factor(classless_test$`Protocol`)  
+predicted_class = predict(naive_bayes_model, classless_test)
+
+testdata = dbGetQuery(con, "SELECT * FROM testdata")
+bayes_predictions = cbind.data.frame(testdata, predicted_class)
+
+write.csv(bayes_predictions, "bayes_predictions_pratt.csv", row.names = FALSE)
+
+dbWriteTable(con, name = "bayes_predictions", value = bayes_predictions, overwrite = TRUE, row.names = FALSE)
