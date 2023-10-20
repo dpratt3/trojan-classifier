@@ -35,8 +35,8 @@ for (i in 1:84) {
     print(sum(is.na(testdata[, i])))
 }
 
-# Create a pre-processing object to impute with medians
-preproc <- preProcess(traindata, method = "medianImpute")
+# # Create a pre-processing object to impute with medians
+# preproc <- preProcess(traindata, method = "medianImpute")
 
 # Apply the pre-processing to your data
 # aggr(traindata, col = c("navy", "red"), numbers = TRUE, sortVars = TRUE)
@@ -88,6 +88,7 @@ for(i in 9:(dim(traindata)[[2]] - 1)){
 }
 
 traindata = traindata[, -which(pvalues > 0.01 / length(pvalues))] # bonferroni correction]
+utilized_cols = colnames(traindata) # we will abstract the model from here
 
 correlations = cor(traindata[, indices[9: (dim(traindata)[[2]] - 1) ] ] )
 # Assuming you want to identify pairs with a correlation of at least 0.7
@@ -111,5 +112,22 @@ rows = sample(nrow(traindata_pca), sample_size)
 down_sampled_train <- traindata_pca[rows, ]
 testing_data <- traindata_pca[-rows, ]
 
-dbWriteTable(con, name = "down_sampled_train", value = down_sampled_train, overwrite = TRUE)
-dbWriteTable(con, name = "down_sampled_test", value = testing_data, overwrite = TRUE)
+dbWriteTable(con, name = "down_sampled_train", value = down_sampled_train, overwrite = TRUE, row.names = FALSE)
+dbWriteTable(con, name = "down_sampled_test", value = testing_data, overwrite = TRUE, row.names = FALSE)
+
+# Using the columns from train data, process test data
+utilized_cols = utilized_cols[utilized_cols != "class"]
+
+testdata$Timestamp <- as.POSIXct(testdata$Timestamp)
+testdata$day_of_week <- as.factor(wday(testdata$Timestamp, label = TRUE))
+testdata$hour_of_day <- as.factor(hour(testdata$Timestamp))
+testdata <- testdata[, !names(testdata) %in% "Timestamp"]
+testdata <- testdata[, c("day_of_week", "hour_of_day", names(testdata)[!names(testdata) %in% c("day_of_week", "hour_of_day")])]
+
+testdata = dplyr::select(testdata, all_of(utilized_cols))
+preproc <- preProcess(testdata, method = "medianImpute")
+testdata <- predict(preproc, newdata = testdata)
+numeric_pca = prcomp(testdata[, 9:(dim(testdata)[[2]])], center = TRUE, scale = TRUE)
+testdata_pca = cbind.data.frame(testdata[, 1:8], numeric_pca$x[ ,1:22])
+
+dbWriteTable(con, name = "classless_test", value = testdata_pca, overwrite = TRUE, row.names = FALSE)
